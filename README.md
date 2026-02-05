@@ -289,7 +289,7 @@ Complete Spring Boot project with all dependencies
 | Name | Student ID | Role | Email |
 |------|-----------|------|-------|
 | Thái Gia Huy | 2280601236 | Full-stack Developer | thaigiahuy6912@gmail.com |
-| Đào Hoàng Thịnh | SE123457 | UI/UX, BA, Tester | daohoangthinhlo@example.com |
+| Đào Hoàng Thịnh | 2280603080 | UI/UX, BA, Tester | daohoangthinhlo@example.com |
 
 **Course:** Application Development using J2EE
 **Instructor:** Mr. Le Viet Linh   
