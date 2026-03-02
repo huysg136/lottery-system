@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Lottery - Lottery System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header" style="margin-top:1.5rem">
+            <h1 class="page-title">Choose a Lottery</h1>
+            <p class="page-subtitle">Select the game you want to play</p>
+        </div>
+
+        <div class="lottery-grid">
+            <a th:each="type : ${lotteryTypes}" th:href="@{/lottery/numbers/{id}(id=${type.id})}" class="lottery-card">
+                <div class="lottery-card-title" th:text="${type.name}">Game</div>
+                <div class="lottery-card-jackpot" th:text="${type.jackpotAmount}">$500M</div>
+                <div class="lottery-card-desc" th:text="${type.description}">Pick numbers</div>
+                <div class="lottery-card-meta">
+                    <span class="badge badge-blue">
+                        Pick <span th:text="${type.mainCount}">5</span> (1-<span th:text="${type.mainMax}">69</span>)
+                        + Bonus (1-<span th:text="${type.bonusMax}">26</span>)
+                    </span>
+                    <span class="fs-4 fw-bold text-success" th:text="'$' + ${type.price}">$2.00</span>
+                    <span class="badge badge-gray" th:text="${type.nextDrawDate}">Draw</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</body>
+
+</html>

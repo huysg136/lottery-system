@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Lottery System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container" style="max-width:960px">
+        <!-- Page Header -->
+        <div class="page-header" style="margin-top:1.5rem">
+            <h1 class="page-title">Welcome, <span class="text-primary"
+                    th:text="${user.firstName ?: user.username}">User</span> 👋</h1>
+            <p class="page-subtitle">Choose your lottery and try your luck today!</p>
+        </div>
+
+        <!-- Lottery Games -->
+        <div class="card" style="margin-bottom:1.5rem">
+            <div class="card-header">
+                <span class="card-title">Available Lottery Games</span>
+                <a th:href="@{/lottery/select}" class="btn btn-primary btn-sm">Buy Tickets →</a>
+            </div>
+            <div class="card-body">
+                <div class="lottery-grid">
+                    <a th:each="type : ${lotteryTypes}" th:href="@{/lottery/numbers/{id}(id=${type.id})}"
+                        class="lottery-card">
+                        <div class="lottery-card-title" th:text="${type.name}">Game Name</div>
+                        <div class="lottery-card-jackpot" th:text="${type.jackpotAmount}">$500M</div>
+                        <div class="lottery-card-desc" th:text="${type.description}">Description</div>
+                        <div class="lottery-card-meta">
+                            <span class="badge badge-blue">Pick <span th:text="${type.mainCount}">5</span> + <span
+                                    th:text="'1 Bonus'"></span></span>
+                            <span class="badge badge-green">$<span th:text="${type.price}">2.00</span>/ticket</span>
+                            <span class="badge badge-gray" th:text="${type.nextDrawDate}">Draw date</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Play -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">How to Play</span>
+            </div>
+            <div class="card-body">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem">
+                    <div style="text-align:center; padding:.5rem">
+                        <div style="font-size:2rem; margin-bottom:.5rem">1️⃣</div>
+                        <div style="font-weight:600; margin-bottom:.25rem">Choose a Game</div>
+                        <div class="text-muted text-sm">Select Powerball or Mega Millions</div>
+                    </div>
+                    <div style="text-align:center; padding:.5rem">
+                        <div style="font-size:2rem; margin-bottom:.5rem">2️⃣</div>
+                        <div style="font-weight:600; margin-bottom:.25rem">Pick Numbers</div>
+                        <div class="text-muted text-sm">Manual pick or Quick Pick</div>
+                    </div>
+                    <div style="text-align:center; padding:.5rem">
+                        <div style="font-size:2rem; margin-bottom:.5rem">3️⃣</div>
+                        <div style="font-weight:600; margin-bottom:.25rem">Add to Cart</div>
+                        <div class="text-muted text-sm">Review tickets before buying</div>
+                    </div>
+                    <div style="text-align:center; padding:.5rem">
+                        <div style="font-size:2rem; margin-bottom:.5rem">4️⃣</div>
+                        <div style="font-weight:600; margin-bottom:.25rem">Checkout</div>
+                        <div class="text-muted text-sm">Complete your purchase</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:with="activePage='home'"></div>
+
+</body>
+
+</html>

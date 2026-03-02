@@ -1,0 +1,515 @@
+/* ============================================
+   Lottery System - Simple & Clean UI
+   ============================================ */
+
+/* Base */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --primary: #1a56db;
+    --primary-dark: #1240a4;
+    --success: #0e9f6e;
+    --danger: #f05252;
+    --warning: #e3a008;
+    --bg: #f3f4f6;
+    --white: #ffffff;
+    --text: #111827;
+    --text-muted: #6b7280;
+    --border: #d1d5db;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* ====== NAVBAR ====== */
+.navbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+}
+
+.navbar-brand {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    list-style: none;
+}
+
+.nav-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: .4rem .75rem;
+    border-radius: var(--radius);
+    font-size: .9rem;
+    font-weight: 500;
+    transition: background .15s, color .15s;
+}
+
+.nav-link:hover { background: var(--bg); color: var(--text); }
+.nav-link.active { color: var(--primary); }
+
+.cart-badge {
+    background: var(--danger);
+    color: white;
+    border-radius: 50%;
+    font-size: .7rem;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+}
+
+.btn-logout {
+    color: var(--danger);
+    text-decoration: none;
+    padding: .4rem .75rem;
+    border-radius: var(--radius);
+    font-size: .9rem;
+    font-weight: 500;
+    transition: background .15s;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+.btn-logout:hover { background: #fef2f2; }
+
+/* ====== LAYOUT ====== */
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.page-subtitle {
+    color: var(--text-muted);
+    font-size: .9rem;
+    margin-top: .25rem;
+}
+
+/* ====== ALERTS ====== */
+.alert {
+    padding: .75rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    font-size: .875rem;
+}
+.alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.alert-info    { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+
+/* ====== CARD ====== */
+.card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.card-body { padding: 1.25rem; }
+.card-footer { padding: .75rem 1.25rem; border-top: 1px solid var(--border); background: #f9fafb; border-radius: 0 0 var(--radius) var(--radius); }
+
+/* ====== BUTTONS ====== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .5rem 1rem;
+    border-radius: var(--radius);
+    font-size: .875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    color: white;
+    transition: opacity .15s, box-shadow .15s;
+    text-decoration: none;
+}
+
+.btn:hover { opacity: .9; box-shadow: var(--shadow-md); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn-primary   { background: var(--primary); }
+.btn-success   { background: var(--success); }
+.btn-danger    { background: var(--danger); }
+.btn-outline   { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
+.btn-outline:hover { background: var(--primary); color: white; }
+.btn-sm        { padding: .35rem .75rem; font-size: .8rem; }
+.btn-lg        { padding: .7rem 1.5rem; font-size: 1rem; }
+
+/* ====== FORMS ====== */
+.form-group { margin-bottom: 1rem; }
+.form-label {
+    display: block;
+    font-size: .875rem;
+    font-weight: 500;
+    margin-bottom: .35rem;
+    color: var(--text);
+}
+.form-control {
+    width: 100%;
+    padding: .5rem .75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: .9rem;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color .15s, box-shadow .15s;
+}
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.15);
+}
+.form-error { color: var(--danger); font-size: .8rem; margin-top: .25rem; }
+
+/* ====== TABLE ====== */
+.table-wrapper { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .875rem;
+}
+
+thead th {
+    background: #f9fafb;
+    padding: .65rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+tbody td {
+    padding: .75rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #f9fafb; }
+
+/* ====== LOTTERY CARD GRID ====== */
+.lottery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.lottery-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color .15s, box-shadow .15s;
+    display: block;
+}
+
+.lottery-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+.lottery-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: .5rem;
+}
+
+.lottery-card-jackpot {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--success);
+    margin-bottom: .25rem;
+}
+
+.lottery-card-desc {
+    font-size: .85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.lottery-card-meta {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    padding: .2rem .6rem;
+    border-radius: 4px;
+    font-size: .78rem;
+    font-weight: 500;
+}
+.badge-blue  { background: #dbeafe; color: #1e40af; }
+.badge-green { background: #d1fae5; color: #065f46; }
+.badge-gray  { background: #f3f4f6; color: #4b5563; }
+
+/* ====== NUMBER SELECTOR ====== */
+.number-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    gap: .4rem;
+    margin-bottom: 1rem;
+}
+
+.number-ball {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    user-select: none;
+}
+
+.number-ball:hover { border-color: var(--primary); color: var(--primary); }
+.number-ball.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+.number-ball.bonus { border-color: #f97316; }
+.number-ball.bonus:hover { border-color: #ea580c; color: #ea580c; }
+.number-ball.bonus.selected { background: #f97316; border-color: #f97316; color: white; }
+
+/* ====== SELECTED NUMBERS DISPLAY ====== */
+.selected-display {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin: .75rem 0;
+    min-height: 52px;
+    align-items: center;
+    padding: .5rem;
+    background: var(--bg);
+    border-radius: var(--radius);
+    border: 1px dashed var(--border);
+}
+
+.selected-ball {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .9rem;
+}
+
+.selected-ball.bonus-ball {
+    background: #f97316;
+}
+
+.placeholder-text {
+    color: var(--text-muted);
+    font-size: .875rem;
+}
+
+/* ====== AUTH PAGES ====== */
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    padding: 1rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.auth-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    margin-bottom: .25rem;
+}
+
+.auth-subtitle {
+    color: var(--text-muted);
+    font-size: .875rem;
+    margin-bottom: 1.5rem;
+}
+
+.auth-divider {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: .85rem;
+    margin: 1rem 0;
+}
+
+/* ====== TICKET NUMBERS DISPLAY ====== */
+.ticket-numbers {
+    display: flex;
+    gap: .35rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.num-chip {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.num-chip.bonus-chip {
+    background: #f97316;
+}
+
+/* ====== STATS ROW ====== */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+}
+
+.stat-label {
+    font-size: .8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: .2rem;
+}
+
+/* ====== EMPTY STATE ====== */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: .5rem;
+}
+
+/* ====== UTILITIES ====== */
+.text-muted     { color: var(--text-muted); }
+.text-primary   { color: var(--primary); }
+.text-success   { color: var(--success); }
+.text-danger    { color: var(--danger); }
+.text-sm        { font-size: .875rem; }
+.fw-bold        { font-weight: 700; }
+.mt-1           { margin-top: .25rem; }
+.mt-2           { margin-top: .5rem; }
+.mt-3           { margin-top: .75rem; }
+.mt-4           { margin-top: 1rem; }
+.mb-0           { margin-bottom: 0; }
+.mb-1           { margin-bottom: .25rem; }
+.mb-3           { margin-bottom: .75rem; }
+.d-flex         { display: flex; }
+.align-center   { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2          { gap: .5rem; }
+.gap-3          { gap: .75rem; }
+.w-full         { width: 100%; }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 640px) {
+    .container { padding: 1rem; }
+    .navbar { padding: 0 1rem; }
+    .number-ball { width: 38px; height: 38px; font-size: .8rem; }
+    .number-grid { grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: .3rem; }
+}

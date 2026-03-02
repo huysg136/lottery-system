@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <nav th:fragment="navbar" class="navbar">
+        <a href="/home" class="navbar-brand">🎰 Lottery</a>
+        <ul class="navbar-nav">
+            <li><a th:href="@{/home}" class="nav-link" th:classappend="${activePage=='home'} ? ' active'">Home</a></li>
+            <li><a th:href="@{/lottery/select}" class="nav-link"
+                    th:classappend="${activePage=='lottery'} ? ' active'">Buy Tickets</a></li>
+            <li>
+                <a th:href="@{/cart}" class="nav-link" th:classappend="${activePage=='cart'} ? ' active'">
+                    Cart
+                    <span class="cart-badge" th:if="${cartCount != null and cartCount > 0}"
+                        th:text="${cartCount}"></span>
+                </a>
+            </li>
+            <li><a th:href="@{/tickets/history}" class="nav-link"
+                    th:classappend="${activePage=='history'} ? ' active'">My Tickets</a></li>
+            <li sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/admin/dashboard}" class="nav-link"
+                    th:classappend="${activePage=='admin-dashboard'} ? ' active'" style="color:var(--danger)">🔧
+                    Admin</a>
+            </li>
+            <li>
+                <form th:action="@{/logout}" method="post" style="display:inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="btn-logout">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+</body>
+
+</html>
