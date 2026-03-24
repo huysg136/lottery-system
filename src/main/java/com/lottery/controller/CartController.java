@@ -72,7 +72,7 @@ public class CartController {
         if (item != null && item.getUser().getId().equals(user.getId())) {
             if (mainNumbers != null && bonusNumber != null) {
                 // Manual update
-                item.setMainNumbers(mainNumbers);
+                item.setMainNumbers(mainNumbers.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(",")));
                 item.setBonusNumber(bonusNumber);
             }
             cartItemRepository.save(item);
@@ -91,11 +91,17 @@ public class CartController {
             return "redirect:/cart";
         }
 
-        List<Ticket> tickets = ticketService.checkout(user, cartItems);
-        cartService.clearCart(user);
+        try {
+            List<Ticket> tickets = ticketService.checkout(user, cartItems);
+            cartService.clearCart(user);
 
-        redirectAttributes.addFlashAttribute("success",
-                "Purchase successful! " + tickets.size() + " ticket(s) purchased.");
-        return "redirect:/tickets/history";
+            redirectAttributes.addFlashAttribute("success",
+                    "Purchase successful! " + tickets.size() + " ticket(s) purchased.");
+
+            return "redirect:/tickets/history";
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/cart";
+        }
     }
 }

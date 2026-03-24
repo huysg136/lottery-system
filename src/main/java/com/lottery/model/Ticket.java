@@ -36,10 +36,27 @@ public class Ticket {
     @Column(name = "published_date")
     private LocalDateTime publishedDate;
 
+    @Column(name = "win_amount", precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal winAmount = BigDecimal.ZERO;
+
+    @Column(name = "winning_numbers")
+    private String winningNumbers;
+
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<TicketNumber> ticketNumbers;
 
     public int getTicketCount() {
         return ticketNumbers != null ? ticketNumbers.size() : 0;
+    }
+
+    public String[] getWinningMainNumbersArray() {
+        if (winningNumbers == null || !winningNumbers.contains("|")) return new String[0];
+        return winningNumbers.split("\\|")[0].trim().split(",");
+    }
+
+    public String getWinningBonusNumber() {
+        if (winningNumbers == null || !winningNumbers.contains("|")) return "";
+        return winningNumbers.split("\\|")[1].trim();
     }
 }

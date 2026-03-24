@@ -20,17 +20,45 @@
                 <p class="page-subtitle">Manage all purchased tickets</p>
             </div>
             <div>
-                <a th:href="@{/admin/export/pdf}" class="btn btn-primary">📄 Export All to PDF</a>
+                <form th:action="@{/admin/draw}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-warning" style="font-weight: bold; background: #f59e0b; color: white;">🎲 Conduct Draw</button>
+                </form>
             </div>
         </div>
 
-        <div class="card">
-            <h3 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">All Tickets
-                Sold</h3>
+        <!-- Flash message -->
+        <div class="alert alert-success" th:if="${success}" th:text="${success}" style="margin-bottom: 1rem;"></div>
 
-            <div th:if="${#lists.isEmpty(tickets)}" class="text-center"
+        <div class="card">
+            <div style="margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0;">All Tickets Sold</h3>
+                <form th:action="@{/admin/dashboard}" method="get" class="d-flex" style="gap:0.5rem; align-items:center;">
+                    <select name="gameId" class="form-control" style="width:auto; padding:0.25rem 0.5rem; height:auto;">
+                        <option value="">All Games</option>
+                        <option th:each="type : ${lotteryTypes}" 
+                                th:value="${type.id}" 
+                                th:text="${type.name}"
+                                th:selected="${selectedGameId != null and selectedGameId == type.id}"></option>
+                    </select>
+                    <select name="status" class="form-control" style="width:auto; padding:0.25rem 0.5rem; height:auto;">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">Pending Draw</option>
+                        <option value="WON" th:selected="${selectedStatus == 'WON'}">Won</option>
+                        <option value="LOST" th:selected="${selectedStatus == 'LOST'}">Lost</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                    <a th:href="@{/admin/dashboard}" th:if="${param.gameId != null or param.status != null}" class="btn btn-outline btn-sm">Clear</a>
+                </form>
+            </div>
+
+            <div th:if="${#lists.isEmpty(tickets) and (param.gameId == null and param.status == null)}" class="text-center"
                 style="padding: 3rem 0; color: var(--text-muted);">
                 <i>No tickets have been sold yet.</i>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(tickets) and (param.gameId != null or param.status != null)}" class="text-center"
+                style="padding: 3rem 0; color: var(--text-muted);">
+                <i>No tickets found matching your filters.</i>
             </div>
 
             <div th:if="${!#lists.isEmpty(tickets)}">
@@ -44,6 +72,7 @@
                             <th>Price</th>
                             <th>Selling Date</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -60,17 +89,29 @@
                             <td>
                                 <div th:each="num : ${ticket.ticketNumbers}" class="d-flex"
                                     style="flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.25rem;">
-                                    <span class="num-chip" th:text="${num.mainNumbers}">1,2,3,4,5</span>
+                                    <span th:each="n : ${num.mainNumbersArray}" class="num-chip" th:text="${n}">1</span>
                                     <span class="num-chip bonus-chip" th:text="${num.bonusNumber}">12</span>
+                                </div>
+                                <div th:if="${ticket.winningNumbers != null}" style="margin-top:0.5rem; padding-top:0.5rem; border-top:1px dashed var(--border);">
+                                    <div class="text-sm text-muted" style="margin-bottom:0.25rem;">Winning Numbers:</div>
+                                    <div class="d-flex" style="flex-wrap: wrap; gap: 0.25rem;">
+                                        <span th:each="n : ${ticket.winningMainNumbersArray}" class="num-chip" style="background:var(--primary);color:white;" th:text="${n}">1</span>
+                                        <span class="num-chip bonus-chip" style="background:#f59e0b;" th:text="${ticket.winningBonusNumber}">12</span>
+                                    </div>
                                 </div>
                             </td>
                             <td class="fw-bold text-success">$<span th:text="${ticket.totalAmount}">2.00</span></td>
                             <td class="text-muted text-sm"
                                 th:text="${#temporals.format(ticket.dateOfSelling, 'MMM dd, yyyy HH:mm')}">Date</td>
                             <td>
-                                <span th:if="${ticket.publishedDate == null}" class="badge badge-gray">Pending
-                                    Draw</span>
-                                <span th:if="${ticket.publishedDate != null}" class="badge badge-primary">Drawn</span>
+                                <span th:if="${ticket.publishedDate == null}" class="badge badge-gray">Pending Draw</span>
+                                <span th:if="${ticket.publishedDate != null and ticket.winAmount.compareTo(0) == 0}" class="badge badge-gray" style="background:var(--gray-300);">Lost</span>
+                                <span th:if="${ticket.publishedDate != null and ticket.winAmount.compareTo(0) > 0}" class="badge badge-green" style="font-weight:bold;">
+                                    🏆 Won $<span th:text="${ticket.winAmount}">10.00</span>
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/admin/export/pdf/{id}(id=${ticket.id})}" class="btn btn-outline btn-sm">📄 Export PDF</a>
                             </td>
                         </tr>
                     </tbody>

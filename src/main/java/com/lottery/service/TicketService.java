@@ -2,12 +2,13 @@ package com.lottery.service;
 
 import com.lottery.model.*;
 import com.lottery.repository.TicketRepository;
+import com.lottery.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
 
 import java.time.LocalDateTime;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final UserRepository userRepository;
 
     public List<Ticket> getTicketHistory(User user) {
         return ticketRepository.findByUserOrderByDateOfSellingDesc(user);
@@ -28,8 +30,17 @@ public class TicketService {
 
     @Transactional
     public List<Ticket> checkout(User user, List<CartItem> cartItems) {
-        // Group by lotteryType (one Ticket per lotteryType in cart)
-        // Simplified: one Ticket per CartItem for clarity
+        BigDecimal totalCost = cartItems.stream()
+                .map(item -> item.getLotteryType().getPrice())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (user.getBalance().compareTo(totalCost) < 0) {
+            throw new IllegalStateException("Insufficient balance to complete the purchase.");
+        }
+
+        user.setBalance(user.getBalance().subtract(totalCost));
+        userRepository.save(user);
+
         List<Ticket> tickets = new ArrayList<>();
 
         for (CartItem item : cartItems) {

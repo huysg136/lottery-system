@@ -21,6 +21,11 @@
             </li>
             <li><a th:href="@{/tickets/history}" class="nav-link"
                     th:classappend="${activePage=='history'} ? ' active'">My Tickets</a></li>
+            <li th:if="${userBalance != null}">
+                <span class="nav-link" style="color:var(--green); font-weight:600; cursor:default;">
+                    💵 $<span th:text="${userBalance}">100.00</span>
+                </span>
+            </li>
             <li sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/admin/dashboard}" class="nav-link"
                     th:classappend="${activePage=='admin-dashboard'} ? ' active'" style="color:var(--danger)">🔧

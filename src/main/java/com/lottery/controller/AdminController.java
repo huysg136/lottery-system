@@ -8,12 +8,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import jakarta.servlet.http.HttpServletResponse;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.*;
-
+import com.itextpdf.text.DocumentException;
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.math.BigDecimal;
+
+import com.lottery.service.PdfExportService;
+import com.lottery.service.DrawService;
+import com.lottery.repository.LotteryTypeRepository;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
@@ -21,74 +27,70 @@ import java.util.List;
 public class AdminController {
 
     private final TicketRepository ticketRepository;
+    private final PdfExportService pdfExportService;
+    private final DrawService drawService;
+    private final LotteryTypeRepository lotteryTypeRepository;
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Long gameId,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String status,
+            Model model) {
+        
         List<Ticket> allTickets = ticketRepository.findAll();
+
+        if (gameId != null) {
+            allTickets = allTickets.stream()
+                    .filter(t -> t.getLotteryType().getId().equals(gameId))
+                    .collect(Collectors.toList());
+        }
+
+        if (status != null && !status.isEmpty()) {
+            if ("PENDING".equalsIgnoreCase(status)) {
+                allTickets = allTickets.stream().filter(t -> t.getPublishedDate() == null).collect(Collectors.toList());
+            } else if ("WON".equalsIgnoreCase(status)) {
+                allTickets = allTickets.stream().filter(t -> t.getPublishedDate() != null && t.getWinAmount().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
+            } else if ("LOST".equalsIgnoreCase(status)) {
+                allTickets = allTickets.stream().filter(t -> t.getPublishedDate() != null && t.getWinAmount().compareTo(BigDecimal.ZERO) == 0).collect(Collectors.toList());
+            }
+        }
+
         model.addAttribute("tickets", allTickets);
+        model.addAttribute("lotteryTypes", lotteryTypeRepository.findAll());
+        model.addAttribute("selectedGameId", gameId);
+        model.addAttribute("selectedStatus", status);
         model.addAttribute("activePage", "admin-dashboard");
         return "admin/dashboard";
     }
 
-    @GetMapping("/export/pdf")
-    public void exportToPDF(HttpServletResponse response) throws IOException, DocumentException {
+    @GetMapping("/export/pdf/{id}")
+    public void exportSingleTicketPDF(@org.springframework.web.bind.annotation.PathVariable Long id, HttpServletResponse response) throws IOException, DocumentException {
+        Ticket ticket = ticketRepository.findById(id).orElse(null);
+        if (ticket == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Ticket not found");
+            return;
+        }
+
         response.setContentType("application/pdf");
         String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=lottery_tickets_report.pdf";
+        String headerValue = "attachment; filename=ticket_" + ticket.getId() + ".pdf";
         response.setHeader(headerKey, headerValue);
 
-        List<Ticket> tickets = ticketRepository.findAll();
+        pdfExportService.exportTicketsToPdfStream(ticket.getUser(), List.of(ticket), response.getOutputStream());
+    }
 
-        Document document = new Document(PageSize.A4.rotate());
-        PdfWriter.getInstance(document, response.getOutputStream());
-
-        document.open();
+    @PostMapping("/draw")
+    public String conductDraw(RedirectAttributes redirectAttributes) {
+        Map<String, Integer> results = drawService.conductDraw();
+        int winners = results.get("winners");
+        int checked = results.get("checked");
         
-        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
-        Paragraph title = new Paragraph("Lottery Tickets Sales Report", titleFont);
-        title.setAlignment(Element.ALIGN_CENTER);
-        title.setSpacingAfter(20);
-        document.add(title);
-
-        PdfPTable table = new PdfPTable(7);
-        table.setWidthPercentage(100f);
-        table.setWidths(new float[] {1f, 3f, 2f, 3f, 1.5f, 2.5f, 1.5f});
-
-        addTableHeader(table);
-        addRows(table, tickets);
-
-        document.add(table);
-        document.close();
-    }
-
-    private void addTableHeader(PdfPTable table) {
-        String[] headers = {"ID", "User", "Game", "Numbers", "Price ($)", "Selling Date", "Published Date"};
-        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
-        for (String header : headers) {
-            PdfPCell cell = new PdfPCell(new Phrase(header, font));
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setPadding(5);
-            table.addCell(cell);
+        if (checked == 0) {
+            redirectAttributes.addFlashAttribute("success", "No pending tickets to draw.");
+        } else {
+            redirectAttributes.addFlashAttribute("success", "Draw completed! Checked " + checked + " ticket(s) and found " + winners + " winner(s). Prizes have been awarded.");
         }
-    }
-
-    private void addRows(PdfPTable table, List<Ticket> tickets) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm");
-        Font dataFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
-        for (Ticket t : tickets) {
-            table.addCell(new Phrase(String.valueOf(t.getId()), dataFont));
-            table.addCell(new Phrase(t.getUser().getFirstName() + " " + t.getUser().getLastName() + "\n" + t.getUser().getEmail(), dataFont));
-            table.addCell(new Phrase(t.getLotteryType().getName(), dataFont));
-            
-            StringBuilder nums = new StringBuilder();
-            t.getTicketNumbers().forEach(tn -> {
-                nums.append(tn.getMainNumbers()).append(" [").append(tn.getBonusNumber()).append("]\n");
-            });
-            table.addCell(new Phrase(nums.toString(), dataFont));
-            
-            table.addCell(new Phrase(String.format("$%.2f", t.getTotalAmount()), dataFont));
-            table.addCell(new Phrase(t.getDateOfSelling() != null ? t.getDateOfSelling().format(formatter) : "", dataFont));
-            table.addCell(new Phrase(t.getPublishedDate() != null ? t.getPublishedDate().format(formatter) : "Pending", dataFont));
-        }
+        
+        return "redirect:/admin/dashboard";
     }
 }
